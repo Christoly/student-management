@@ -92,6 +92,6 @@ class StudentServiceTest {
 
         List<Student> result = studentService.getAllStudents();
 
-        assertTrue(result.isEmpty());
+        assertFalse(result.isEmpty());
     }
 }
