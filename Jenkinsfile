@@ -10,7 +10,7 @@ pipeline {
         pollSCM('H/5 * * * *')
     }
 
-    evironment {
+    environment {
        IMAGE_NAME = 'christoly/student-management'
        IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
