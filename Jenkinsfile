@@ -10,6 +10,11 @@ pipeline {
         pollSCM('H/5 * * * *')
     }
 
+    evironment {
+       IMAGE_NAME = 'christoly/student-management'
+       IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+
     stages {
 
         stage('Commit') {
@@ -41,9 +46,31 @@ pipeline {
                 }
             }
         }
+        
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest .'
+            }
+       }
+
+       stage('Docker Push') {
+           steps {
+               withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials',
+                                                 usernameVariable: 'DH_USER',
+                                                 passwordVariable: 'DH_TOKEN')]) {
+                   sh 'echo "$DH_TOKEN" | docker login -u "$DH_USER" --password-stdin'
+                   sh 'docker push $IMAGE_NAME:$IMAGE_TAG'
+                   sh 'docker push $IMAGE_NAME:latest'
+               }
+           }
+       }
     }
 
     post {
+        always {
+            sh 'docker logout || true'
+        }
+
         success {
             archiveArtifacts artifacts: 'target/*.jar',
                              fingerprint: true
